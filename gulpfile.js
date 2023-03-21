@@ -3,8 +3,8 @@ import { path } from "./gulp/config/path.js";
 import { plugins } from "./gulp/config/plugins.js";
 
 global.app = {
-  isBuild: process.argv.includes('--build'),
-  isDev: !process.argv.includes('--build'),
+  isBuild: process.argv.includes("--build"),
+  isDev: !process.argv.includes("--build"),
   path: path,
   gulp: gulp,
   plugins: plugins,
@@ -20,8 +20,9 @@ import { images } from "./gulp/tasks/images.js";
 import { otfToTtf, ttfToWoff, fontsStyle } from "./gulp/tasks/fonts.js";
 import { svgSpriteM } from "./gulp/tasks/svgSpriteM.js";
 import { zip } from "./gulp/tasks/zip.js";
+import { gitHubPage } from "./gulp/tasks/gitHubPage.js";
 
-function watcher () {
+function watcher() {
   gulp.watch(path.watch.files, copy);
   gulp.watch(path.watch.html, html);
   gulp.watch(path.watch.files, reset);
@@ -30,20 +31,26 @@ function watcher () {
   gulp.watch(path.watch.images, images);
 }
 
-export { svgSpriteM }
+export { svgSpriteM };
 
 const fonts = gulp.series(otfToTtf, ttfToWoff, fontsStyle);
 
-const mainTask = gulp.series(fonts, gulp.parallel(copy, html, scss, js, images));
+const mainTask = gulp.series(
+  fonts,
+  gulp.parallel(copy, html, scss, js, images)
+);
 
 const dev = gulp.series(reset, mainTask, gulp.parallel(watcher, server));
 
 const build = gulp.series(reset, mainTask);
+
+const deployGitHub = gulp.series(build, gitHubPage);
 
 const deployZIP = gulp.series(reset, mainTask, zip);
 
 export { dev };
 export { build };
 export { deployZIP };
+export { deployGitHub };
 
-gulp.task('default', dev);
+gulp.task("default", dev);
